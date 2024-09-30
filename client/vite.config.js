@@ -12,4 +12,7 @@ export default defineConfig({
     },
   },
   plugins: [react()],
+  // optimizeDeps: {
+  //   include: ["redux-persist/integration/react"],
+  // },
 });

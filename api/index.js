@@ -1,4 +1,5 @@
 import express from "express";
+import nodemailer from "nodemailer";
 import mongoose, { mongo } from "mongoose";
 import dotenv from "dotenv";
 import userRouter from "./routes/user.route.js";

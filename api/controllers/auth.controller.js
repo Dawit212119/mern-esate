@@ -89,7 +89,7 @@ export const google = async (req, res, next) => {
           Math.random().toString(36).slice(-4),
         email: req.body.email,
         password: hashedPassword,
-        avater: req.body.photo,
+        avatar: req.body.photo,
       });
       await newUser.save();
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
@@ -99,5 +99,7 @@ export const google = async (req, res, next) => {
         .status(200)
         .json(rest);
     }
-  } catch (error) {}
+  } catch (error) {
+    next(error);
+  }
 };

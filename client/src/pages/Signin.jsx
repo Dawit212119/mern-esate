@@ -1,32 +1,29 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
 import {
   signInFailure,
   signInStart,
   signInSuccess,
 } from "../redux/user/userSlice";
+import { useDispatch, useSelector } from "react-redux";
 import OAuth from "../components/OAuth";
-export default function Signin() {
-  const { error, loading: isLoading } = useSelector((state) => state.user);
-  const dispatch = useDispatch();
-  const [formData, setformData] = useState({});
 
+function Signin() {
+  const [formData, setFormData] = useState({});
+  const { loading, error } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const handleChange = (e) => {
-    setformData({
+  function handleChange(e) {
+    setFormData({
       ...formData,
       [e.target.id]: e.target.value,
     });
-  };
-  console.log(formData);
-  const handleSubmit = async (e) => {
+  }
+  async function handleSubmit(e) {
     e.preventDefault();
-    //setIsLoading(true);
-    console.log(formData);
     dispatch(signInStart());
     try {
-      const res = await fetch("/api/auth/signin", {
+      const res = await fetch(`/api/auth/signin`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -34,54 +31,50 @@ export default function Signin() {
         body: JSON.stringify(formData),
       });
       const data = await res.json();
-      console.log(data);
+
       if (data.success === false) {
-        console.log("Error");
-        dispatch(signInFailure(data.message));
-        return;
+        throw new Error(data.message);
       }
+
       dispatch(signInSuccess(data));
       navigate("/");
     } catch (error) {
-      dispatch(signInFailure(data.message));
+      dispatch(signInFailure(error.message));
     }
-  };
+  }
+
   return (
-    <div className="max-w-lg mx-auto">
-      <h1 className="text-3xl text-center font-semibold my-7">Sign In</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <div className="max-w-xl mx-auto p-3">
+      <h1 className="font-semibold text-center my-7 text-3xl"> Sign in </h1>
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <input
-          type="text"
+          type="email"
           placeholder="email"
           id="email"
-          className="border p-3 rounded-lg"
+          className="p-3 border rounded-xl "
           onChange={handleChange}
         />
         <input
-          type="text"
+          type="password"
           placeholder="password"
           id="password"
-          className="border p-3 rounded-lg"
+          className="p-3 border rounded-xl "
           onChange={handleChange}
         />
-        <button
-          disabled={isLoading}
-          className="bg-slate-700
-         text-white p-3 rounded-lg 
-         uppercase hover:opacity-95 
-         disabled:opacity-85"
-        >
-          {isLoading ? "Loading..." : " Sign In"}
+        <button className="bg-slate-700 p-3 uppercase hover: opacity-95 rounded-xl text-white disabled:opacity-80">
+          {loading ? `loading` : `sign in`}
         </button>
         <OAuth />
       </form>
-      <div className="flex gap-2 py-5">
-        <p>Dont have an account?</p>
-        <Link to="/signup">
-          <span className="text-blue-700">Sign Up</span>
-        </Link>
-      </div>
+      <p className="mt-5">
+        Don`t have an account?{" "}
+        <span className="text-blue-700">
+          <Link to="/sign-up">Sign Up</Link>
+        </span>
+      </p>
       {error && <p className="text-red-500 mt-5">{error}</p>}
     </div>
   );
 }
+
+export default Signin;

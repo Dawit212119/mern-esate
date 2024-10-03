@@ -1,34 +1,46 @@
 import express from "express";
-import nodemailer from "nodemailer";
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 import dotenv from "dotenv";
-import userRouter from "./routes/user.route.js";
-import authRouter from "./routes/auth.route.js";
+//import cookieParser from "cookie-parser";
+import userRouter from "./routes/User.route.js";
+import authRouter from "./routes/Auth.route.js";
+//import listingRouter from "./routes/Listing.route.js";
+//import { verifyToken } from "./utils/VerifyUser.js";
 dotenv.config();
 mongoose
-  .connect(process.env.MONGO, { serverSelectionTimeoutMS: 20000 })
+  .connect(process.env.MONGO)
   .then(() => {
     console.log("connected to mongodb");
   })
   .catch((err) => {
     console.log(err);
   });
+
+// use await mongoose.connect('mongodb://user:password@127.0.0.1:27017/test'); if your database has auth enabled
 const app = express();
 app.use(express.json());
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
+//app.use(cookieParser());
+//app.use(verifyToken);
+const port = 3000;
+
+app.get("/", (req, res) => {
+  res.send("Hello World!");
 });
 
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
+});
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
-
-app.use((error, req, res, next) => {
-  const statuscode = error.statuscode || 500;
-  const message = error.message || "Internal Server Error";
-
-  return res.status(statuscode).json({
-    success: false,
-    statuscode,
+//app.use("/api/listing", listingRouter);
+//app.use("/api/user", userRouter);
+//middleware for handling the error
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "Internal Server Error!";
+  return res.status(statusCode).json({
     message,
+    success: false,
+    statusCode,
   });
 });

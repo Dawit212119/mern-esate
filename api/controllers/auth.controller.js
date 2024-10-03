@@ -70,6 +70,7 @@ const sendEmail = (username, email) => {
 
 export const google = async (req, res, next) => {
   try {
+    console.log(req);
     const user = await User.findOne({ email: req.body.email });
     if (user) {
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);

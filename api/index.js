@@ -1,6 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 //import cookieParser from "cookie-parser";
 import userRouter from "./routes/User.route.js";
 import authRouter from "./routes/Auth.route.js";
@@ -19,6 +20,7 @@ mongoose
 // use await mongoose.connect('mongodb://user:password@127.0.0.1:27017/test'); if your database has auth enabled
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 //app.use(cookieParser());
 //app.use(verifyToken);
 const port = 3000;

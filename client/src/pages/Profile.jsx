@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useRef } from "react";
 import {
   getDownloadURL,
@@ -7,7 +7,16 @@ import {
   ref,
   uploadBytesResumable,
 } from "firebase/storage";
+import {
+  updateStart,
+  updateSuccess,
+  updateFailure,
+  deleteStart,
+  deleteFailure,
+  deleteSuccess,
+} from "../redux/user/userSlice";
 import { app } from "../firebase";
+import { errorHandler } from "../../../api/utils/error";
 // firebase storage
 //      allow read;
 //allow write: if  request.resource.size < 2 *1024 *1024 &&
@@ -17,11 +26,14 @@ export default function Profile() {
   const [file, setfile] = useState(undefined);
   const [fileperc, setFilePerc] = useState(0);
   const [formData, setFormData] = useState({});
-
+  const [updateSuccessPro, setUpdateSuccessPro] = useState(false);
+  const [deleteUser, setdeleteuser] = useState(false);
+  const dispatch = useDispatch();
   const [fileUploadError, setFileUploadError] = useState(false);
   const fileRef = useRef(null);
-  const { currentUser } = useSelector((state) => state.user);
+  const { currentUser, loading, error } = useSelector((state) => state.user);
   console.log(formData);
+  console.log(currentUser);
   console.log(fileperc);
   useEffect(() => {
     if (file) {
@@ -59,6 +71,46 @@ export default function Profile() {
     setFormData({ ...formData, [e.target.id]: [e.target.value] });
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      dispatch(updateStart());
+      const res = await fetch(`/api/user/update/${currentUser._id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json;
+      if (data.success === false) {
+        dispatch(updateFailure(error.mesage));
+        return;
+      }
+      dispatch(updateSuccess(data));
+      setUpdateSuccessPro(true);
+    } catch (error) {
+      dispatch(updateFailure(error.mesage));
+    }
+  };
+  const handleDelete = async (e) => {
+    try {
+      dispatch(deleteStart());
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json;
+      if (data.success === false) {
+        dispatch(deleteFailure(data.message));
+        return;
+      }
+      dispatch(deleteSuccess());
+      setdeleteuser(true);
+      alert("Account Deleted!");
+    } catch (error) {
+      dispatch(deleteFailure(error.mesage));
+    }
+  };
   return (
     <div className="m-10 pr-10  ">
       <div
@@ -69,7 +121,7 @@ export default function Profile() {
           Profile
         </h1>
 
-        <form className="flex flex-col gap-6">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <input
             type="file"
             ref={fileRef}
@@ -116,20 +168,24 @@ export default function Profile() {
             className="border p-3 rounded-lg focus:outline-none"
           />
           <input
-            type="text"
+            type="password"
             placeholder="password"
             id="password"
             onChange={handleChange}
             className="border p-3 rounded-lg focus:outline-none"
           />
-          <button className="bg-slate-700 p-3 rounded-lg text-white uppercase hover:opacity-95">
-            update
+          <button
+            disabled={loading}
+            className="bg-slate-700 p-3 rounded-lg text-white uppercase hover:opacity-95"
+          >
+            {loading ? "Loading..." : "Update"}
           </button>
         </form>
         <div className="flex justify-between mt-10 mb-7 uppercase">
           <span
             className="  text-red-700
         cursor-pointer font-semibold"
+            onClick={handleDelete}
           >
             Delete account
           </span>
@@ -137,6 +193,14 @@ export default function Profile() {
             Sign out
           </span>
         </div>
+        <p
+          className={`${
+            updateSuccessPro ? "text-green-700" : "text-red-700"
+          } mb-5`}
+        >
+          {updateSuccessPro ? "User is updated successfully!" : error}
+        </p>
+        <p>{}</p>
       </div>
     </div>
   );

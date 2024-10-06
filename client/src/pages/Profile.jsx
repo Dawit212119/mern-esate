@@ -14,6 +14,9 @@ import {
   deleteStart,
   deleteFailure,
   deleteSuccess,
+  signOutStart,
+  signOutFailure,
+  signOutSuccess,
 } from "../redux/user/userSlice";
 import { app } from "../firebase";
 import { errorHandler } from "../../../api/utils/error";
@@ -111,6 +114,39 @@ export default function Profile() {
       dispatch(deleteFailure(error.mesage));
     }
   };
+  // const SignoutPopup = ({ onClose }) => {
+  //   return (
+  //     <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+  //       <div className="bg-white p-5 rounded shadow-lg text-center">
+  //         <p>You are signing out...</p>
+  //         <button
+  //           onClick={onClose}
+  //           className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+  //         >
+  //           Close
+  //         </button>
+  //       </div>
+  //     </div>
+  //   );
+  // };
+  const handleSignout = async () => {
+    try {
+      dispatch(signOutStart());
+      // setShowPopup(true);
+
+      const res = await fetch("/api/auth/signout");
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(signOutFailure(data.mesage));
+      }
+      dispatch(signOutSuccess());
+
+      // setTimeout(() => {
+      //   setShowPopup(false);
+      //   navigate("/signin");
+      // }, 2000);
+    } catch (error) {}
+  };
   return (
     <div className="m-10 pr-10  ">
       <div
@@ -189,7 +225,10 @@ export default function Profile() {
           >
             Delete account
           </span>
-          <span className="text-red-700 font-semibold cursor-pointer">
+          <span
+            className="text-red-700 font-semibold cursor-pointer"
+            onClick={handleSignout}
+          >
             Sign out
           </span>
         </div>

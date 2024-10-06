@@ -55,6 +55,10 @@ export default function Profile() {
     );
   };
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: [e.target.value] });
+  };
+
   return (
     <div className="m-10 pr-10  ">
       <div
@@ -75,7 +79,7 @@ export default function Profile() {
           />
           <img
             onClick={() => fileRef.current.click()}
-            src={formData.avatar || currentUser.avatar}
+            src={formData?.avatar || currentUser?.avatar}
             alt="profile"
             className="rounded-full h-24 w-24 object-cover
         cursor-pointer self-center focus:outline-none "
@@ -98,19 +102,24 @@ export default function Profile() {
           <input
             type="text"
             placeholder="username"
+            defaultValue={currentUser?.username}
             className="border focus:outline-none p-3 rounded-lg"
             id="username"
+            onChange={handleChange}
           />
           <input
             type="type"
             placeholder="email"
             id="email"
+            defaultValue={currentUser?.email}
+            onChange={handleChange}
             className="border p-3 rounded-lg focus:outline-none"
           />
           <input
             type="text"
             placeholder="password"
             id="password"
+            onChange={handleChange}
             className="border p-3 rounded-lg focus:outline-none"
           />
           <button className="bg-slate-700 p-3 rounded-lg text-white uppercase hover:opacity-95">

@@ -22,12 +22,14 @@ import {
 import { app } from "../firebase";
 import { errorHandler } from "../../../api/utils/error";
 import Listing from "../../../api/model/listing.model";
+import { configDotenv } from "dotenv";
 // firebase storage
 //      allow read;
 //allow write: if  request.resource.size < 2 *1024 *1024 &&
 //request.resource.contentType.matches('image/.*')
 
 export default function Profile() {
+  const [hover, sethover] = useState(false);
   const [file, setfile] = useState(undefined);
   const [fileperc, setFilePerc] = useState(0);
   const [formData, setFormData] = useState({});
@@ -167,6 +169,28 @@ export default function Profile() {
       setShowListingError(true);
     }
   };
+  const handleListingDelete = async (listingid) => {
+    try {
+      const res = await fetch(`/api/listing/delete/${listingid}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success === "false") {
+        console.log(data.mesage);
+      }
+
+      setUserListing((prev) =>
+        prev.filter((listing) => listing._id !== listingid)
+      );
+    } catch (error) {
+      console.log(error.mesage);
+    }
+  };
+  // const handleOver = () => {
+  //   if (userListing.length < 1) {
+  //     sethover((e) => !e);
+  //   }
+  // };
   return (
     <div className="m-10 pr-10  ">
       <div
@@ -266,9 +290,15 @@ export default function Profile() {
         >
           {updateSuccessPro ? "User is updated successfully!" : error}
         </p>
-        <button onClick={handleshowlisting} className="  w-full text-green-700">
+        <button
+          // onMouseOver={handleOver}
+          onClick={handleshowlisting}
+          className="  w-full text-green-700"
+        >
           Show listings
         </button>
+        {/* <p className="text-center ">{hover && "You dont have any listing!"}</p> */}
+
         <p>{showListingError ? "Error showing listing" : ""}</p>
         {/* <p className="text-center py-7"> Your listings</p> */}
 
@@ -297,7 +327,12 @@ export default function Profile() {
                 </Link>
 
                 <div className="flex flex-col items-center">
-                  <button className="text-red-700 uppercase">Delete</button>
+                  <button
+                    className="text-red-700 uppercase"
+                    onClick={() => handleListingDelete(listing._id)}
+                  >
+                    Delete
+                  </button>
                   <button className="text-green-600 uppercase">Edit</button>
                 </div>
               </div>

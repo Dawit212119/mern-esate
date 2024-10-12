@@ -21,6 +21,7 @@ import {
 } from "../redux/user/userSlice";
 import { app } from "../firebase";
 import { errorHandler } from "../../../api/utils/error";
+import Listing from "../../../api/model/listing.model";
 // firebase storage
 //      allow read;
 //allow write: if  request.resource.size < 2 *1024 *1024 &&
@@ -33,6 +34,8 @@ export default function Profile() {
   const [updateSuccessPro, setUpdateSuccessPro] = useState(false);
   const [deleteUser, setdeleteuser] = useState(false);
   const dispatch = useDispatch();
+  const [userListing, setUserListing] = useState([]);
+  const [showListingError, setShowListingError] = useState(false);
   const [fileUploadError, setFileUploadError] = useState(false);
   const fileRef = useRef(null);
   const { currentUser, loading, error } = useSelector((state) => state.user);
@@ -146,13 +149,29 @@ export default function Profile() {
       //   setShowPopup(false);
       //   navigate("/signin");
       // }, 2000);
-    } catch (error) {}
+    } catch (error) {
+      dispatch(signOutFailure(error.mesage));
+    }
+  };
+  const handleshowlisting = async () => {
+    try {
+      setShowListingError(false);
+      const res = await fetch(`/api/user/listings/${currentUser._id}`);
+      const data = await res.json();
+      if (data.success === "false") {
+        setShowListingError(true);
+      }
+      console.log(data);
+      setUserListing(data);
+    } catch (error) {
+      setShowListingError(true);
+    }
   };
   return (
     <div className="m-10 pr-10  ">
       <div
-        className="p-3 max-w-lg bg-white mx-auto border border-gray-300 border-2 rounded-lg
-     border-t-2 shadow-lg"
+        className="p-3 max-w-lg bg-white mx-auto rounded-lg
+     border-t-2 "
       >
         <h1 className="text-center  text-3xl my-7 font-semibold uppercase">
           Profile
@@ -247,6 +266,44 @@ export default function Profile() {
         >
           {updateSuccessPro ? "User is updated successfully!" : error}
         </p>
+        <button onClick={handleshowlisting} className="  w-full text-green-700">
+          Show listings
+        </button>
+        <p>{showListingError ? "Error showing listing" : ""}</p>
+        {/* <p className="text-center py-7"> Your listings</p> */}
+
+        {userListing && userListing.length > 0 && (
+          <div className="flex flex-col">
+            <h1 className="text-center my-7 font-semibold text-2xl">
+              Your listing
+            </h1>
+            {userListing.map((listing) => (
+              <div
+                key={listing._id}
+                className=" border rounded-lg p-3 flex items-center justify-between gap-4"
+              >
+                <Link to={`/listing/${currentUser._id}`}>
+                  <img
+                    src={listing.imageUrls[0]}
+                    alt="listing cover"
+                    className="w-16 h-16 object-contain"
+                  />
+                </Link>
+                <Link
+                  className="font-semibold text-slate-700 flex-1 hover:underline truncate"
+                  to={`/listing/${currentUser._id}`}
+                >
+                  <p>{listing.name}</p>
+                </Link>
+
+                <div className="flex flex-col items-center">
+                  <button className="text-red-700 uppercase">Delete</button>
+                  <button className="text-green-600 uppercase">Edit</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

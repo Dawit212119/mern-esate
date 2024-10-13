@@ -44,3 +44,15 @@ export const updateListing = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getListingToUpdate = async (req, res, next) => {
+  try {
+    const listing = await Listing.findById(req.params.id);
+    if (!listing) {
+      return next(errorHandler(404, "Cant update!"));
+    }
+    res.status(200).json(listing);
+  } catch (error) {
+    next(error);
+  }
+};

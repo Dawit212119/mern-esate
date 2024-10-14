@@ -12,6 +12,9 @@ export default defineConfig({
     },
   },
   plugins: [react()],
+  optimizeDeps: {
+    exclude: ["swiper", "swiper/react"],
+  },
   // optimizeDeps: {
   //   include: ["redux-persist/integration/react"],
   // },

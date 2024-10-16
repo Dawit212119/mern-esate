@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
 import { Swiper, SwiperSlide } from "swiper/react";
 import SwiperCore from "swiper";
-import { Autoplay, Navigation } from "swiper/modules";
+import { useSelector } from "react-redux";
+import { Navigation } from "swiper/modules";
 import "swiper/css/bundle";
 import {
   FaBath,
@@ -14,64 +14,57 @@ import {
   FaParking,
   FaShare,
 } from "react-icons/fa";
-import { useSelector } from "react-redux";
 import Contact from "../components/Contact";
+
+// https://sabe.io/blog/javascript-format-numbers-commas#:~:text=The%20best%20way%20to%20format,format%20the%20number%20with%20commas.
+
 export default function Listing() {
-  SwiperCore.use([Navigation, Autoplay]);
-  const [loading, setloading] = useState(false);
-  const [error, seterror] = useState(false);
+  SwiperCore.use([Navigation]);
+  const [listing, setListing] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const [copied, setCopied] = useState(false);
   const [contact, setContact] = useState(false);
-  const [listing, setListing] = useState(null);
-  const { currentUser } = useSelector((state) => state.user);
   const params = useParams();
-  console.log(params);
+  const { currentUser } = useSelector((state) => state.user);
+
   useEffect(() => {
-    const fetchingListing = async () => {
+    const fetchListing = async () => {
       try {
-        setloading(true);
-        const res = await fetch(`/api/listing/getlisting/${params.listingId}`);
+        setLoading(true);
+        const res = await fetch(`/api/listing/get/${params.listingId}`);
         const data = await res.json();
         if (data.success === false) {
-          seterror(true);
-          setloading(false);
+          setError(true);
+          setLoading(false);
           return;
         }
         setListing(data);
-        setloading(false);
+        setLoading(false);
+        setError(false);
       } catch (error) {
-        seterror(true);
-        setloading(false);
+        setError(true);
+        setLoading(false);
       }
     };
-    fetchingListing();
-  }, [params.listingid]);
+    fetchListing();
+  }, [params.listingId]);
 
   return (
     <main>
-      {loading && (
-        <p className="text-center text-2xl my-7 font-semibold">Loading...</p>
-      )}
+      {loading && <p className="text-center my-7 text-2xl">Loading...</p>}
       {error && (
-        <p className="text-red-700 text-center text-2xl my-7">
-          Something went wrong!
-        </p>
+        <p className="text-center my-7 text-2xl">Something went wrong!</p>
       )}
       {listing && !loading && !error && (
         <div>
-          <Swiper
-            navigation
-            autoplay={{
-              delay: 3000, // Delay between slides in milliseconds (3 seconds)
-              disableOnInteraction: false, // Keeps autoplay running after user interaction
-            }}
-          >
-            {listing.imageUrls.map((urls) => (
-              <SwiperSlide key={urls}>
+          <Swiper navigation>
+            {listing.imageUrls.map((url) => (
+              <SwiperSlide key={url}>
                 <div
                   className="h-[550px]"
                   style={{
-                    background: `url(${urls}) no-repeat center `,
+                    background: `url(${url}) center no-repeat`,
                     backgroundSize: "cover",
                   }}
                 ></div>
@@ -91,62 +84,62 @@ export default function Listing() {
             />
           </div>
           {copied && (
-            <p className=" fixed top-[25%] right-[5%] z-10 rounded-md bg-slate-100 p-2">
-              Link Copied!
+            <p className="fixed top-[23%] right-[5%] z-10 rounded-md bg-slate-100 p-2">
+              Link copied!
             </p>
           )}
-          {}
-          <div className="flex flex-col p-3 mx-auto max-w-4xl gap-4 my-7">
+          <div className="flex flex-col max-w-4xl mx-auto p-3 my-7 gap-4">
             <p className="text-2xl font-semibold">
               {listing.name} - ${" "}
               {listing.offer
                 ? listing.discountPrice.toLocaleString("en-US")
                 : listing.regularPrice.toLocaleString("en-US")}
-              {listing.type === "rent" ? "/month" : ""}
+              {listing.type === "rent" && " / month"}
             </p>
-            <p className="flex gap-2 items-center">
-              <FaMapMarkerAlt className="text-green-700" /> {listing.address}
+            <p className="flex items-center mt-6 gap-2 text-slate-600  text-sm">
+              <FaMapMarkerAlt className="text-green-700" />
+              {listing.address}
             </p>
             <div className="flex gap-4">
-              <p className="bg-red-900 text-center text-white w-full max-w-[200px] rounded-md p-1 ">
+              <p className="bg-red-900 w-full max-w-[200px] text-white text-center p-1 rounded-md">
                 {listing.type === "rent" ? "For Rent" : "For Sale"}
               </p>
               {listing.offer && (
-                <p className="bg-green-900 text-center text-white w-full max-w-[200px] rounded-md p-1">
-                  $ {+listing.regularPrice - +listing.discountPrice} discount
+                <p className="bg-green-900 w-full max-w-[200px] text-white text-center p-1 rounded-md">
+                  ${+listing.regularPrice - +listing.discountPrice} OFF
                 </p>
               )}
             </div>
-            <p>
-              <span className="font-semibold">Description</span> -{" "}
+            <p className="text-slate-800">
+              <span className="font-semibold text-black">Description - </span>
               {listing.description}
             </p>
-            <ul className=" flex flex-wrap gap-4 text-green-900 text-sm font-semibold sm:gap-6">
-              <li className="flex gap-1 items-center whitespace-nowrap">
+            <ul className="text-green-900 font-semibold text-sm flex flex-wrap items-center gap-4 sm:gap-6">
+              <li className="flex items-center gap-1 whitespace-nowrap ">
                 <FaBed className="text-lg" />
                 {listing.bedrooms > 1
-                  ? `${listing.bedrooms} Beds`
-                  : `${listing.bedrooms} Bed`}
+                  ? `${listing.bedrooms} beds `
+                  : `${listing.bedrooms} bed `}
               </li>
-              <li className="flex gap-1 items-center whitespace-nowrap">
+              <li className="flex items-center gap-1 whitespace-nowrap ">
                 <FaBath className="text-lg" />
                 {listing.bathrooms > 1
-                  ? `${listing.bathrooms} Baths`
-                  : `${listing.bathrooms} Bath`}
+                  ? `${listing.bathrooms} baths `
+                  : `${listing.bathrooms} bath `}
               </li>
-              <li className="flex gap-1 items-center whitespace-nowrap">
+              <li className="flex items-center gap-1 whitespace-nowrap ">
                 <FaParking className="text-lg" />
-                {listing.Parking ? `Parking spot` : `No parking`}
+                {listing.parking ? "Parking spot" : "No Parking"}
               </li>
-              <li className="flex gap-1 items-center whitespace-nowrap">
+              <li className="flex items-center gap-1 whitespace-nowrap ">
                 <FaChair className="text-lg" />
-                {listing.Furnished ? `Furnished` : `No Furnished`}
+                {listing.furnished ? "Furnished" : "Unfurnished"}
               </li>
             </ul>
-            {currentUser && currentUser._id !== listing.userRef && !contact && (
+            {currentUser && listing.userRef !== currentUser._id && !contact && (
               <button
                 onClick={() => setContact(true)}
-                className="bg-slate-700 w-full p-3 rounded-md text-white uppercase mt-7 hover:opacity-95"
+                className="bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 p-3"
               >
                 Contact landlord
               </button>

@@ -4,6 +4,10 @@ import { Link } from "react-router-dom";
 export default function Contact({ listing }) {
   console.log(listing);
   const [landlord, setlandlord] = useState();
+  const [message, setMessage] = useState("");
+  const onChange = (e) => {
+    setMessage(e.target.value);
+  };
 
   useEffect(() => {
     const fetchingUser = async () => {
@@ -31,7 +35,11 @@ export default function Contact({ listing }) {
               <span className="font-semibold"> {listing.name} </span>
             </p>
             <textarea
-              type="text"
+              name="message"
+              id="message"
+              rows="2"
+              value={message}
+              onChange={onChange}
               className="w-full p-3 rounded-lg"
               placeholder="Enter your message here..."
             />

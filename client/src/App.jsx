@@ -13,6 +13,7 @@ import CreateListing from "./pages/createListing";
 //import Listing from "../../api/model/listing.model";
 import Listing from "./pages/Listing";
 import UpdateListing from "./pages/updateListing";
+import Search from "./pages/search";
 export default function App() {
   return (
     <BrowserRouter>
@@ -22,6 +23,8 @@ export default function App() {
         <Route path="/signin" element={<Signin />} />
         <Route path="/sign-up" element={<Signup />} />
         <Route path="/about" element={<About />} />
+        <Route path="/search" element={<Search />} />
+
         <Route path="/listing/:listingId" element={<Listing />} />
         <Route element={<Privateroute />}>
           <Route path="/profile" element={<Profile />} />

@@ -57,7 +57,7 @@ export const getListingToUpdate = async (req, res, next) => {
   }
 };
 
-export const getlisitngs = async (req, res, next) => {
+export const getlistings = async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 9;
     const startIndex = parseInt(req.query.startIndex) || 0;
@@ -92,6 +92,8 @@ export const getlisitngs = async (req, res, next) => {
       .sort({ [sort]: order })
       .limit(limit)
       .skip(startIndex);
+
+    return res.status(200).json(listings);
   } catch (error) {
     next(error);
   }

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 export default function Search() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [sidebardata, setSidebardata] = useState({
     searchTerm: "",
     type: "all",
@@ -11,16 +12,16 @@ export default function Search() {
     sort: "created_at",
     order: "desc",
   });
-
+  console.log(sidebardata);
   useEffect(() => {
     const urlparams = new URLSearchParams(location.search);
-    const searchTermFromUrl = urlparams.get("searchTerm");
-    const parkingFromUrl = urlparams.get("parking");
-    const typeFromUrl = urlparams.get("type");
-    const orderFromUrl = urlparams.get("order");
-    const furnishedFromUrl = urlparams.get("furnished");
-    const sortFromUrl = urlparams.get("sort");
-    const offerFromUrl = urlparams.get("offer");
+    const searchTermFromUrl = urlparams.get("searchTerm") || ""; // fallback to an empty string if undefined
+    const parkingFromUrl = urlparams.get("parking") === "true"; // convert "true"/"false" string to boolean
+    const typeFromUrl = urlparams.get("type") || "all"; // fallback to "all" if undefined
+    const orderFromUrl = urlparams.get("order") || "desc"; // fallback to "desc"
+    const furnishedFromUrl = urlparams.get("furnished") === "true"; // convert to boolean
+    const sortFromUrl = urlparams.get("sort") || "created_at"; // fallback to "created_at"
+    const offerFromUrl = urlparams.get("offer") === "true"; // convert to boolean
 
     if (
       searchTermFromUrl ||
@@ -32,13 +33,13 @@ export default function Search() {
       offerFromUrl
     ) {
       setSidebardata({
-        searchTerm: searchTermFromUrl || "",
-        parking: parkingFromUrl === "true" ? "true" : "false",
-        type: typeFromUrl || "all",
-        offer: offerFromUrl === "true" ? "true" : "false",
-        sort: sortFromUrl || "created_at",
-        furnsihed: furnishedFromUrl === "true" ? "true" : "false",
-        order: orderFromUrl || "desc",
+        searchTerm: searchTermFromUrl,
+        parking: parkingFromUrl,
+        type: typeFromUrl,
+        offer: offerFromUrl,
+        sort: sortFromUrl,
+        furnished: furnishedFromUrl,
+        order: orderFromUrl,
       });
     }
 
@@ -48,10 +49,12 @@ export default function Search() {
       const data = await res.json();
     };
     fetchListing();
-  });
+  }, [location.search]);
 
   const handlesubmit = (e) => {
+    e.preventDefault();
     const urlparams = new URLSearchParams(window.location.search);
+    urlparams.set("searchTerm", sidebardata.searchTerm);
     urlparams.set("parking", sidebardata.parking);
     urlparams.set("furnished", sidebardata.furnished);
     urlparams.set("type", sidebardata.type);
@@ -66,7 +69,7 @@ export default function Search() {
     if (e.target.id === "searchTerm") {
       setSidebardata({
         ...sidebardata,
-        searchTerm: e.target.id,
+        searchTerm: e.target.value,
       });
     }
 
@@ -86,17 +89,17 @@ export default function Search() {
       e.target.id === "offer"
     ) {
       setSidebardata({
-        ...setSidebardata,
+        ...sidebardata,
         [e.target.id]: e.target.checked,
       });
     }
     if (e.target.id === "sort_order") {
       const value = e.target.value;
-      const lastindexofunderscore = value.lastIndexOf(_);
+      const lastindexofunderscore = value.lastIndexOf("_");
       const sort = value.slice(0, lastindexofunderscore);
       const order = value.slice(lastindexofunderscore + 1);
       setSidebardata({
-        ...setSidebardata,
+        ...sidebardata,
         sort,
         order,
       });
@@ -114,6 +117,9 @@ export default function Search() {
             <input
               className="rounded-lg border p-3 focus:outline-none"
               type="text"
+              id="searchTerm"
+              value={sidebardata.searchTerm}
+              onChange={handleChange}
               placeholder="Search..."
             />
           </div>
@@ -143,8 +149,7 @@ export default function Search() {
               <input
                 type="checkbox"
                 className="w-5"
-                id=""
-                sale
+                id="sale"
                 onChange={handleChange}
                 checked={sidebardata.type === "sale"}
               />
@@ -156,7 +161,7 @@ export default function Search() {
                 className="w-5"
                 id="offer"
                 onChange={handleChange}
-                checked={sidebardata.offer}
+                checked={!!sidebardata.offer}
               />
               <span>Offer</span>
             </div>
@@ -169,7 +174,7 @@ export default function Search() {
                 className="w-5"
                 id="parking"
                 onChange={handleChange}
-                checked={sidebardata.parking}
+                checked={!!sidebardata.parking}
               />
               <span>Parking</span>
             </div>
@@ -179,7 +184,7 @@ export default function Search() {
                 className="w-5"
                 id="furnished"
                 onChange={handleChange}
-                checked={sidebardata.furnished}
+                checked={!!sidebardata.furnished}
               />
               <span>Furnished</span>
             </div>
@@ -199,6 +204,7 @@ export default function Search() {
             </select>
           </div>
           <button
+            type="submit"
             className="p-3 w-full bg-slate-700 rounded-lg text-white uppercase
            hover:opacity-95 disabled:opacity-50 mt-7"
           >

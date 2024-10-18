@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import ListingItem from "../components/LisitingItem";
 export default function Search() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -12,7 +13,10 @@ export default function Search() {
     sort: "created_at",
     order: "desc",
   });
+  const [listing, setListing] = useState([]);
+  const [loading, setloading] = useState(false);
   console.log(sidebardata);
+  console.log(listing);
   useEffect(() => {
     const urlparams = new URLSearchParams(location.search);
     const searchTermFromUrl = urlparams.get("searchTerm") || ""; // fallback to an empty string if undefined
@@ -44,9 +48,12 @@ export default function Search() {
     }
 
     const fetchListing = async () => {
+      setloading(true);
       const searchQuery = urlparams.toString();
       const res = await fetch(`/api/listing/get?${searchQuery}`);
       const data = await res.json();
+      setListing(data);
+      setloading(false);
     };
     fetchListing();
   }, [location.search]);
@@ -212,10 +219,24 @@ export default function Search() {
           </button>
         </form>
       </div>
-      <div className="">
+      <div className=" flex-1">
         <h1 className="p-7 text-3xl text-slate-500 font-semibold">
-          Listing results:{" "}
+          Listing results:
         </h1>
+        <div className="flex flex-wrap gap-4">
+          {!loading && listing.length <= 0 && <p>Listing Not found!</p>}
+
+          {loading && (
+            <p className="text-center p-7 text-xl w-full text-slate-700">
+              Loading...
+            </p>
+          )}
+          {!loading &&
+            listing &&
+            listing.map((listing) => (
+              <ListingItem key={listing._id} listing={listing} />
+            ))}
+        </div>
       </div>
     </div>
   );

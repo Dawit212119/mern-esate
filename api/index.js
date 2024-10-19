@@ -7,6 +7,8 @@ import userRouter from "./routes/user.route.js";
 import authRouter from "./routes/auth.route.js";
 import path from "path";
 import listingRouter from "./routes/listing.route.js";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 //import { verifyToken } from "./utils/VerifyUser.js";
 dotenv.config();
 mongoose
@@ -17,8 +19,9 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
-
-const _dirname = path.resolve();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+// const _dirname = path.resolve();
 
 // use await mongoose.connect('mongodb://user:password@127.0.0.1:27017/test'); if your database has auth enabled
 const app = express();

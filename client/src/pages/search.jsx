@@ -54,12 +54,12 @@ export default function Search() {
       const searchQuery = urlparams.toString();
       const res = await fetch(`/api/listing/get?${searchQuery}`);
       const data = await res.json();
-      if (data.listings.length > 8) {
+      if (data.length > 8) {
         setShowMore(true);
       } else {
         setShowMore(false);
       }
-      setListing(data.listings);
+      setListing(data);
       setloading(false);
     };
     fetchListing();
@@ -73,11 +73,11 @@ export default function Search() {
     const searchQuery = urlparams.toString();
     const res = await fetch(`/api/listing/get?${searchQuery}`);
     const data = await res.json();
-    if (data.listings.length < 9) {
+    if (data.length < 9) {
       setShowMore(false);
     }
     console.log(data);
-    setListing([...listing, ...data.listings]);
+    setListing([...listing, ...data]);
   };
 
   const handlesubmit = (e) => {
@@ -246,7 +246,9 @@ export default function Search() {
           Listing results:
         </h1>
         <div className="flex flex-wrap gap-4">
-          {!loading && listing.length <= 0 && <p>Listing Not found!</p>}
+          {!loading && Array.isArray(listing) && listing.length <= 0 && (
+            <p>Listing Not found!</p>
+          )}
 
           {loading && (
             <p className="text-center p-7 text-xl w-full text-slate-700">

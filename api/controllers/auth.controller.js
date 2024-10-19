@@ -42,31 +42,6 @@ export const signin = async (req, res, next) => {
 };
 
 // Send an email function
-const sendEmail = (username, email) => {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.EMAIL, // Your email address
-      pass: process.env.EMAIL_PASSWORD, // Your email password
-    },
-  });
-
-  const mailOptions = {
-    from: process.env.EMAIL, // Sender email
-    to: email, // Send to the user's email
-    subject: "Welcome to Our Platform!",
-    text: `Hi ${username},\n\nThank you for signing in. Your registered email is ${email}.\n\nBest regards,\nYour Company`,
-    html: `<h3>Hi ${username},</h3><p>Thank you for signing in to our platform.</p><p>Your registered email is <strong>${email}</strong>.</p><p>We’re excited to have you on board!</p><br/><p>Best regards,<br/>Your Company</p>`,
-  };
-
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error("Error sending email:", error);
-    } else {
-      console.log("Email sent successfully:", info.response);
-    }
-  });
-};
 
 export const google = async (req, res, next) => {
   try {

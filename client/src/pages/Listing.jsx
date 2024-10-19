@@ -14,12 +14,13 @@ import {
   FaParking,
   FaShare,
 } from "react-icons/fa";
+import { Autoplay } from "swiper/modules";
 import Contact from "../components/Contact";
 
 // https://sabe.io/blog/javascript-format-numbers-commas#:~:text=The%20best%20way%20to%20format,format%20the%20number%20with%20commas.
 
 export default function Listing() {
-  SwiperCore.use([Navigation]);
+  SwiperCore.use([Navigation, Autoplay]);
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -58,7 +59,14 @@ export default function Listing() {
       )}
       {listing && !loading && !error && (
         <div>
-          <Swiper navigation>
+          <Swiper
+            navigation={true} // Enable navigation
+            autoplay={{
+              delay: 3000, // Slide duration (3 seconds)
+              disableOnInteraction: false, // Autoplay will continue after user interaction
+            }}
+            loop={true} // Enables infinite loop
+          >
             {listing.imageUrls.map((url) => (
               <SwiperSlide key={url}>
                 <div

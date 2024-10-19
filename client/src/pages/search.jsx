@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useAsyncError, useLocation, useNavigate } from "react-router-dom";
 import ListingItem from "../components/LisitingItem";
 export default function Search() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [showmore, setShowMore] = useState(false);
   const [sidebardata, setSidebardata] = useState({
     searchTerm: "",
     type: "all",
@@ -49,14 +50,35 @@ export default function Search() {
 
     const fetchListing = async () => {
       setloading(true);
+      setShowMore(false);
       const searchQuery = urlparams.toString();
       const res = await fetch(`/api/listing/get?${searchQuery}`);
       const data = await res.json();
-      setListing(data);
+      if (data.listings.length > 8) {
+        setShowMore(true);
+      } else {
+        setShowMore(false);
+      }
+      setListing(data.listings);
       setloading(false);
     };
     fetchListing();
   }, [location.search]);
+
+  const onShowMoreCLick = async () => {
+    const numberofListings = listing.length;
+    const startIndex = numberofListings;
+    const urlparams = new URLSearchParams(location.search);
+    urlparams.set("startIndex", startIndex);
+    const searchQuery = urlparams.toString();
+    const res = await fetch(`/api/listing/get?${searchQuery}`);
+    const data = await res.json();
+    if (data.listings.length < 9) {
+      setShowMore(false);
+    }
+    console.log(data);
+    setListing([...listing, ...data.listings]);
+  };
 
   const handlesubmit = (e) => {
     e.preventDefault();
@@ -236,6 +258,12 @@ export default function Search() {
             listing.map((listing) => (
               <ListingItem key={listing._id} listing={listing} />
             ))}
+
+          {showmore && (
+            <button className="text-green-700 p-7" onClick={onShowMoreCLick}>
+              Show More...
+            </button>
+          )}
         </div>
       </div>
     </div>

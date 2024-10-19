@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 //import cookieParser from "cookie-parser";
 import userRouter from "./routes/user.route.js";
 import authRouter from "./routes/auth.route.js";
-
+import { path } from "path";
 import listingRouter from "./routes/listing.route.js";
 //import { verifyToken } from "./utils/VerifyUser.js";
 dotenv.config();
@@ -17,6 +17,8 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
+
+const _dirname = path.resolve();
 
 // use await mongoose.connect('mongodb://user:password@127.0.0.1:27017/test'); if your database has auth enabled
 const app = express();
@@ -36,7 +38,10 @@ app.listen(port, () => {
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/listing", listingRouter);
-
+app.use(express.static(path.join(__dirname, "/client/dist")));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
+});
 //app.use("/api/listing", listingRouter);
 //app.use("/api/user", userRouter);
 //middleware for handling the error

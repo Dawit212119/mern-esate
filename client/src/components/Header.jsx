@@ -26,7 +26,7 @@ function Header() {
       <div className="flex justify-between items-center max-w-6xl p-3 mx-auto">
         <Link to="/">
           <h1 className="font-bold text-sm sm:text-xl flex flex-wrap">
-            <span className="text-slate-500">Mern</span>
+            <span className="text-slate-500">Real</span>
             <span className="text-slate-700 ">Estate</span>
           </h1>
         </Link>
